@@ -1,0 +1,24 @@
+                        MultAlin : New in the last releases
+                        ===================================
+
+        In release 5.3.1, bugs have been fixed and a new output format added :
+see "doc Format".
+        In release 5.3.2, the mul format has been modified to become a standard
+Fasta/Pearson format. In all input formats, sequences can be written with lower
+case letters.
+
+	NEW in version 5.4
+	------------------
+	The pairwise and the alignment processes are modified to handle alignment 
+of large families more quickly. In the alignment process, modifications are 
+limited to the implementation (no theoretical change). In the pairwise process, 
+very similar sequences (more than 80% identity) are clustered together without a 
+hierarchical classification and only one sequence in the cluster is compared to 
+the other sequences for the global classification. This allow to reduce 
+drastically the pairwise step that can be time limiting in automatic alignments 
+of large families of sequences.
+
+	Since version 5.4.1, it is possible to align two groups of already aligned 
+sequences (profiles) or a sequence with a profile. MultAlin can 
+read symbol comparison tables from GCG package, version 9 and upper. The user can
+parametrise the doc format.
