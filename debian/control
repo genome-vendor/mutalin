@@ -1,0 +1,12 @@
+Source: mutalin5.4.1 
+Section: science
+Priority: optional
+Build-Depends: debhelper (>= 7)
+Maintainer: The Genome Insitute <gmt@genome.wustl.edu>
+Homepage: http://lipm-bioinfo.toulouse.inra.fr/download/
+
+Package: mutalin5.4.1
+Architecture: amd64
+Depends: 
+Description: Mutalin: a multiple alignment software from Service Bioinformatique, France (http://lipm-bioinfo.toulouse.inra.fr/)
+
