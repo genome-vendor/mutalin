@@ -1,10 +1,14 @@
 DIRS=source
 
 all: force_look
-		cd source; $(MAKE) $(MFLAGS)
+	cd source; $(MAKE) $(MFLAGS)
 
-clean:
-		cd source; $(MAKE) clean
+#clean:
+#	cd source; $(MAKE) clean
 
 force_look:
-		true
+	true
+
+install:
+	cd source; $(MAKE) install
+
