@@ -7,4 +7,8 @@ multalin: afichseq.o aligne.o basproc1.o cluster.o coefdisk.o commande.o coprigh
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS) 
-	
+
+clean:
+	rm mutalin
+	rm *.o
+
