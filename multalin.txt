@@ -1,0 +1,779 @@
+MultAlin documentation
+======================
+(Version 5.0, 5.1, 5.2, 5.3, 5.4)
+
+	To jump to a specific section, search for "SECTION -#-", replacing the # 
+with the appropriate section number.
+
+CONTENTS
+========
+SECTION -0- Introduction
+SECTION -1- New in the last releases
+	NEW in version 5.0
+	NEW in version 5.1
+	NEW in version 5.2
+	NEW in version 5.3, 5.3.1, 5.3.2
+	NEW in version 5.4
+SECTION -2- Installing MultAlin
+SECTION -3- Running MultAlin
+	A. Cautions
+	B. Command line mode
+	C. Interactive mode
+SECTION -4- Algorithm
+	A. Similarity scores for a pair of sequences.
+	B. The FAST alignments (step 0).
+	C. The hierarchical clustering (step 1).
+	D. The Multiple alignment (step 2).
+	E. Consensus sequences and scores (step 3).
+	F. Iteration.
+SECTION -5- File formats
+	A. Input Sequence File
+	B. Output Sequence File
+	C. Clustering Sequence File
+	D. Score File
+SECTION -6- List of the package files
+
+SECTION -0- Introduction
+========================
+	Welcome to MultAlin! This is software that will allow you to align 
+simultaneously several biological sequences on computer that use UNIX system.
+	What is a Multiple sequence alignment? It is the arrangement of several 
+protein or nucleic acid sequences with postulated gaps so that similar residues 
+are juxtaposed. A score is attached to identities, conservative or non-
+conservative substitutions (the score measuring the similarity) and a penalty to 
+gaps; an ideal program would maximise the total score, taking account of all 
+possible alignments and allowing for any length gap at any position.
+	Unfortunately the computing requirements, both of time and memory, grow as 
+the nth power, where n is the sequence number, so this ideal alignment can be 
+found only for two sequences or three short sequences. In the general case, to 
+be practicable programs must restrict the conditions of the optimisation. 
+Nevertheless it is undeniably useful to have an automatic system available for 
+multiple sequence alignment to provide a starting point for a more human 
+analysis.
+	MultAlin creates a multiple sequence alignment from a group of related 
+sequences using progressive pairwise alignments. The method used is described in 
+"Multiple sequence alignment with hierarchical clustering", F.Corpet, 1988, 
+Nucl. Acids Res. 16 10881-10890.
+
+SECTION -1- New in the last releases
+====================================
+NEW in version 5.0
+------------------
+	Comparison tables can include negative entries. GCG tables can be used.
+	Gap penalty can be length dependent. Gap at sequence extremities can be 
+scored or not.
+
+NEW in version 5.1
+------------------
+	There is a maximal number of iterations set to 10 (see F. Iteration).
+	A bug has been fixed that prohibited the comparison of two sequences only.
+	SCO and sco, CLU and clu are now valid extensions for score files and 
+clustering files.
+	Portability has been tested for more platforms.
+
+NEW in version 5.2
+------------------
+	The similarity coefficient at a position is still the mean of all pairwise 
+coefficients at this position, BUT only the sequences for which the position is 
+internal are counted. Example:
+            CCPC50  QDG DAAKGEKEFN .KCKACHMI QAPDGTDII. KGGKTGPNLY
+            CCRF2C  ..G DAAKGEKEFN .KCKTCHSI IAPDGTEIV. KGAKTGPNLY
+            CCRF2S  QEG DPEAGAKAFN .QCQTCHVI VDDSGTTIAG RNAKTGPNLY
+            CCQF2R  .EG DAAAGEKVSK .KCLACHTF DQGGAN.... ...KVGPNLF
+            CCQF2P  .AG DAAVGEKIAK AKCTACHDL NKGGPI.... ...KVGPPLF
+                    |
+MultAlin sequence # 245 5555555555 555555555 5555555555 5555555555
+Clustalv sequence # 245 5555555555 155555555 5555553331 3335555555
+
+	I think that it is important to take the mean over all sequences for new 
+gaps to be preferentially inserted at the same position as old gaps. But this is 
+a problem when sequence lengths are inhomogeneous, so I have made this 
+modification.
+
+NEW in version 5.3, 5.3.1, 5.3.2
+--------------------------------
+	The pairwise scores that are used to build the clustering can now be 
+evaluated by three different methods:
+ absolute = the score is the pairwise alignment score, using the current 
+similarity table and gap penalties. It was the old method.
+ percentage = the score is the pairwise alignment score, divided by the length 
+of the shortest sequence.
+ identity = the score is the number of identical pairs, divided by the length of 
+the shortest sequence.
+	Individual weights can be assigned to each sequence in order to down-
+weight near duplicate sequences and up-weight the most divergent ones. They are 
+computed using the clustering tree and normalised so that their mean is 1.0.They 
+are written on the output file.
+	It is now possible to choose the order of the sequences in the output 
+file, as input or as aligned.
+	MultAlin can be used with already aligned sequences (.mul file), only to 
+change the output file. When the input file has a mul extension, MultAlin does 
+not realign the sequences, but reads the last ma.cfg file and optionally new 
+options to write a new alignment file.
+	The entries of blosum62.tab have been made non-negative by adding 4 to 
+each entry. It becomes the default table.
+
+	In release 5.3.1, bugs have been fixed and a new output format added (see 
+"doc Format").
+
+	In release 5.3.2, the mul format has been modified to become a standard 
+Fasta/Pearson format. In all input formats, sequences can be written with 
+lowercase letters.
+
+	NEW in version 5.4
+	------------------
+	The pairwise and the alignment processes are modified to handle alignment 
+of large families more quickly. In the alignment process, modifications are 
+limited to the implementation (no theoretical change). In the pairwise process, 
+very similar sequences (more than 80% identity) are clustered together without a 
+hierarchical classification and only one sequence in the cluster is compared to 
+the other sequences for the global classification. This allow to reduce 
+drastically the pairwise step that can be time limiting in automatic alignments 
+of large families of sequences.
+
+	Since version 5.4.1, it is possible to align two groups of already aligned 
+sequences (profiles) or a sequence with a profile (see option -2). MultAlin can 
+read symbol comparison tables from GCG package, version 9 and upper. The user can
+parametrise the doc format (see  SECTION -5- File formats/ B. Output Sequence File/ 
+doc Format).
+
+SECTION -2- Installing MultAlin
+===============================
+See ma_c.txt
+
+SECTION -3- Running MultAlin
+=============================
+	A. Cautions
+	===========
+	Before aligning large sequences, you may test MultAlin with shorter 
+sequences, and look at the system occupation (see 'ps' UNIX command) during 
+alignment. When the swap partition of the hard disk is full, MultAlin can use an 
+internal swap mode on user partition.
+
+You can run MultAlin in two modes:
+* command line mode.
+* interactive mode which helps you to select program parameters and options.
+
+Help: type 'ma -h' or 'ma -?' to obtain help screen.
+
+	B. Command line mode
+	====================
+Syntax:(1)               ma [[<Option> ...] <SequenceFile> [<ClusterFile.xxx>]]
+       (2)               ma [<Option> ...] <AlignmentFile.mul>
+
+Syntax (1)
+----------
+If all the sequences to align are in a unique file, <SequenceFile> must be its 
+name. If the sequences are in different files (with a unique format), you can 
+create a file with the list of the sequence file names, one by line. In this 
+case, <SequenceFile> will be @<ListFile>, where <ListFile> is the name of the 
+list file (do not forget the @ in front of the file name). If <SequenceFile> has 
+.mul extension, it will be considered as an alignment file and syntax (2) will 
+be used.
+<ClusterFile.clu> contains cluster obtained by previous FAST alignment (or by 
+any other method) of the same sequences. The file format used is the same that 
+MultAlin MS-DOS version.
+<ClusterFile.sco> contains a triangular table of alignment scores for any pair 
+of sequences included in SequenceFile. These scores are used by MultAlin to 
+compute a first clustering (instead of using Fast).
+If no ClusterFile is given, the first clustering is done with Fast (Lipman &al 
+algorithm).
+
+Options are:
+	-r			Recover last configuration.
+
+Input options:
+	-i:<Input format>	with Format: gcg, embl, genbank,
+				mul (MultAlin=Pearson), auto(matically determined).
+	-p			select Parts of sequences.
+
+Alignment options:
+	-c:<symbol Comparison table>
+	-g:<Gap value>	gap_penalty = gap_value + gap_length_value x length(gap)
+	-l:<Gap length value>
+	-x:<Gap at ext>	0 no penalties, 1 penalty at the end
+				2 penalty at the beginning, 3 at both extremities
+	-1			One iteration only.
+	-u			Unweighted sequences.
+	-s:<Scoring method> with Scor meth: abs(olute), per(centage), ide(ndity)
+
+Output options:
+	-o:<Output format> with Format:  msf (GCG), mul (MultAlin) or doc (Word).
+	-a			output sequences ordered as input.
+	-A			                            aligned  (default)
+	-d			Draw the clustering in the output clustering file.
+	-k:<U>.<L>     U and L are minimal % for Uppercase and Lowercase consensus
+	-q			quiet: no message during alignment
+
+Default options:
+ -i:auto -c:blosum62.tab -g:12 -l:2 -o:msf -x:0 -s:abs -A -k:90.50
+
+ Recover option (-r)
+ --------------------
+	MultAlin always saves configuration parameters, used for the last 
+alignment:
+	- [InputFormat]: input format (gcg, mul, embl, genbank or undefined).
+	- [SymbolCompTableFile]: name of the symbol comparison table file.
+	- [GapValue],[Gap2Value]: penalty for gap opening and extension.
+	- [GapExtValue]: penalty for end gap
+	- [OneIter]: one iteration only (true, false ).
+	- [Weighted]: weighted sequences (true, false ).
+	- [ScoringMethod]: scoring method (absolute, percentage, identity).
+	- [OutputFormat]: output format (msf, mul, doc).
+	- [OutputOrder]: output order (aligned, input).
+	- [ClusteringOutputFormat]: clustering output format (list, drawing).
+	- [ConsensusLevel]: consensus levels.
+	- [OutputStyle],[LineSize],[GraduationStep]: parameters for doc output.
+	
+	This information is saved in a text file 'ma.cfg'. If you want to edit 
+this file, you have to use the same key words.
+
+ Sequence input format (-i)
+ --------------------------
+	MultAlin automatically recognises four formats (GCG, MultAlin, GenBank, 
+EMBL). However, if error message appears, you have to specify input formats or 
+correct sequence syntax (see Files formats in this manual).
+
+ Select parts of sequences option (-p)
+ -------------------------------------
+	If you use this option, the program will pause when reading sequence 
+file(s), and ask you the sequence range to use for alignment.
+
+ Comparison symbol table file (-c) 
+----------------------------------
+	You can use MultAlin tables (.tab), or GCG package tables (.cmp). MultAlin 
+tests the file name for the .cmp extension to know the file format. If the file 
+is not present in the current file, it is looked for in ${MULTALIN}directory: 
+type "ls ${MULTALIN}/*.tab" to get the list of available tables.
+Both kinds of tables contain matrix of coefficients and gap penalties, opening & 
+extension, but MultAlin tables may also contain homology symbols used in the 
+consensus sequence (See "dayhoff.tab" file for example).
+	ATTENTION: old GCG tables (before version 9) give non-integer values: 
+MultAlin multiplies GCG values by 10 to use integer values. 10 must also 
+multiply gap penalties. For example, if you use "nwsgappep.cmp" with a gap value 
+of 5 and a gap length weight of 0.1 in GCG programs, you must use it with a gap 
+value of 50 and a gap length weight of 1 in MultAlin.
+
+ Gap value (-g)
+ ---------------
+ Gap length weight (-l)
+ ----------------------
+	The score of an alignment is equal to the sum of the values of the 
+matches, each one scored with the comparison table, less the gap value times the 
+number of internal gaps and less the gap length weight times the total length of 
+the internal gaps. There is no penalty for end gaps unless the option -x is set 
+to a non-0 value.
+	Default values are -g:12 -l:2
+
+ Gap at extremities (-x)
+ -----------------------
+	With this option, it is possible to weigh end gaps as all other gaps:
+-x:1 a gap at the end is weighted
+-x:2 a gap at the beginning is weighted
+-x:3 both end gaps are weighted
+-x:0 end gaps are not weighted (default).
+
+ One iteration only option (-1)
+ -------------------------------
+	With this option, final alignment can be obtained more quickly, but it may 
+not be the best possible alignment.
+
+ Unweighted sequences option (-u)
+ --------------------------------
+	By default, sequences are weighted. Use this option to give them all a 
+weight of 1.0.
+
+ Scoring method (-s)
+ -----------------------
+	With this option, it is possible to choose how the pairwise scores are 
+computed:
+-s:abs absolute alignment score (default)
+-s:per percentage alignment score
+-s:ide percentage of identical pairs
+
+ Sequence output format (-o)
+ ---------------------------
+	You can save alignment result in two formats: MSF (default) or MultAlin. 
+In both formats, sequences are saved in only one file. If MultAlin format is 
+chosen, a consensus sequence is saved in a second file, with extension .con
+	A third format: doc has been added in version 5.3. It is a MSF file with 
+indications for a Microsoft Word Macro to add colours for conserved regions (see 
+SECTION -5- File formats/ B. Output Sequence File/ doc Format).
+
+ Sequence output order (-a or -A)
+ --------------------------------
+	By default, the sequences are ordered in the output file as they are 
+aligned. If you want them to be ordered as they were in the input file use the 
+option -a. If your input file is a mul file with sequences ordered as the 
+previous input file, use the option -A to get the sequences ordered as aligned.
+
+ Clustering output file (-d)
+ --------------------------
+	When MultAlin calculates the first clustering order (with Fast or from a 
+score table), it is saved in a file with .clu extension. The clustering order 
+used for the last iteration is saved in a file with .cl2 extension.
+	By default, these files format is a list of the sequence names with 
+parentheses indicating how the clustering is done. In this case, the files can 
+be used as input cluster file for an other alignment.
+	The clustering order can also be saved as a dendrogram. The drawing uses 
+text characters and can be printed to any printer or screen. Use the -d option 
+for this format.
+	In the interactive mode, answer l(ist) for the first format (default) and 
+d(rawing) for the other.
+
+ Consensus values option (-k)
+ ----------------------------
+	At the end of the alignment, a consensus sequence is computed. For each 
+column in the alignment, the most representative residue is chosen. If it is 
+present in more than U% sequences, an Uppercase character is written; else if it 
+is present in more than L% sequences, a Lowercase character is written; else a 
+white character is written.
+	Default values are U=90 and L=50, i.e. -k:90.50
+
+ Quiet (-q)
+ ----------
+	With this option, no messages are displayed to the screen.
+
+Syntax (2)
+----------
+			ma [<Option> ...] <AlignmentFile.mul>
+	<AlignmentFile.mul> is an output file of a previous run of MultAlin in 
+MultAlin format and with .mul extension. By default, the alignment will not be 
+changed but new outputs can be obtained with different <Option> (-o, -f, -k and 
+-q).
+
+ Profile alignment option (-2)
+ ----------------------------
+	With this option, the <AlignmentFile> is cut into two profiles that are 
+realigned. The value n of the option is the number of the first sequence in the 
+second profile; the first profile corresponds to aligned sequences 1 to n-1 and 
+the second profile corresponds to aligned sequences n to the end of 
+<AlignmentFile>. Sequence weights are read from the file or set to 1 if 
+unreadable. This new alignment is performed with the last used parameters (as 
+with option -r) or with new options given on the command line (-c, -g, -l, -x).
+
+	C. Interactive mode
+	===================
+	Type 'ma' without any option and answer the questions: they correspond to 
+the options that can be set with the command line mode. Only the principal 
+options are automatically proposed; you must ask for more options (input, 
+alignment & output options) to get the others.
+
+SECTION -4- Algorithm
+=====================
+	The alignment of two sequences can be performed with any program that has 
+been developed since 1970. However, a rigorously optimal alignment of even a 
+small number of short sequences is currently intractable because of the amount 
+of time and memory that would be necessary.
+	MultAlin proposes an alternative approach that sacrifices a SMALL amount 
+of sensitivity for a high degree of computational tractability. MultAlin does a 
+series of progressive pairwise alignments between sequences and clusters of 
+sequences. A cluster consists of two or more already aligned sequences.
+	MultAlin begins by computing similarity scores for every possible pair of 
+sequences using a fast algorithm (step 0). These scores are used to create a 
+hierarchical clustering represented by a dendrogram (step 1). This clustering 
+shows the order of the pairwise alignments that are performed to produce the 
+final alignment (step 2). A consensus sequence and pairwise scores are computed 
+(step 3). To achieve step 3, the scores of all the pairwise alignments included 
+in the multiple one are computed and they can be used to do step 1 again; if the 
+clustering order is different, a new multiple alignment can be done following 
+this new clustering (steps 2 and 3). This process can be iterated until the 
+clustering order remains unchanged by iteration. 
+
+	A. Similarity score for a pair of sequences
+	===========================================
+	This score is equal to the sum of the values of the matches (each match 
+scored with the scoring table) less the gap penalty times the number of the 
+internal gaps and less the gap length weight times the total length of internal 
+gaps. By default, no penalty is charged for terminal gaps.
+An optimal alignment is one with the maximum possible score. It is sensitive to 
+the symbol comparison values and to the gap penalty. Once this optimal alignment 
+is computed, three different similarity scores can be computed (see New in 5.3). 
+By default the pairwise score is the alignment score.
+
+	B. The FAST alignments (step 0)
+	===============================
+	To initiate the process of aligning N sequences, MultAlin must computes N 
+times (N-1) similarity scores. It would take to much time to look for the 
+optimal score. Therefore, MultAlin uses an algorithm from Lipman and Pearson 
+(1985, Science 227, 1435-1441) that gives a score that is not surely the maximum 
+one (because the length of the gaps that can be inserted in each sequence is 
+limited) but that can measure quickly the similarity between two sequences.
+	The first step finds the diagonals having the largest number of short 
+perfect matches (words). The word length depends on the size of the alphabet 
+used to describe the sequences:
+     Alphabet size   Word length   Scoring factor
+        2 or 3            6              24
+        4 to 7            4              16
+        8 to 15           3              12
+       16 to 31           2               8
+	If a word from the second sequence does exist in the first one Fast adds a 
+score for the word to the score of the diagonal on which the word occurs. This 
+added score is equal to the word length times a scoring factor (if a word match 
+overlaps another word on the same diagonal, only the scoring factor for non-
+overlapping symbols is added). When the diagonal is not new, a factor equal to 
+the length between the two perfect matches decreases the score, unless the score 
+becomes negative. In this latter case, the two regions are considered as 
+different and are scored separately.
+	In a second step, the five best diagonal regions are re-scored using the 
+symbol comparison table and the one with the best new score allows to select the 
+best diagonal.
+	In the last step, an alignment of the two sequences is performed around 
+the best diagonal, with a 31 symbol wide window, using the symbol comparison 
+table and the gap penalty given for the multiple alignment. Actually, the 
+alignment is not produced, only its score is computed.
+	This last score is entered in a similarity matrix that records the 
+similarity scores of all possible pair of sequences.
+
+	C. The hierarchical clustering (step 1)
+	=======================================
+	The approach used by MultAlin is sensitive to the order in which sequences 
+are aligned. The multiple alignment will be better if closest sequences are 
+aligned first to each other and then to less similar sequences. A clustering 
+algorithm determines the order of these alignments, from the pairwise similarity 
+scores calculated at the previous step.
+	The method used by MultAlin is called UPGMA for unweighted pair-group 
+method using arithmetic averages (Sneath, P.H.A. and Sokal, R.R. (1973) in 
+Numerical Taxonomy, 230- 234, Freeman, San Francisco). The hierarchy is built 
+from its base (the set of sequences) creating at each step a new cluster by 
+union of two clusters or sequences that are the closest ones. The distance 
+between two clusters or sequences is given by the matrix of similarity that is 
+updated at each step of the clustering as follow. The similarity score between 
+the new cluster and a cluster i is the arithmetic mean of the similarity scores 
+between each of the two clusters which union creates it and the cluster i. At 
+each step, the number of clusters decreases by one until there is only one 
+cluster.
+	The clustering can be represented as a dendrogram that is NOT a 
+phylogenetic tree although the horizontal branch lengths are proportional to the 
+similarity scores. The dendrogram purpose is only to produce a clustering order 
+to create the multiple alignment. This order is the only information from the 
+clustering used by MultAlin.
+
+	D. The Multiple alignment (step 2)
+	==================================
+	The clustering order is used as follow. The two most similar sequences are 
+aligned to produce the first cluster. Then MultAlin aligns the next most related 
+sequence to this cluster or the next two more similar sequences to each other to 
+produce another cluster. A series of such pairwise alignment of clusters 
+includes more and more sequences until there is only one cluster of all the 
+sequences and the final alignment is produced.
+	To align two sequences, MultAlin uses an algorithm from Needleman and 
+Wunsch (1970, J. Mol. Biol. 48, 443-453) that allows to find the maximum 
+possible score between two sequences and one alignment that corresponds to it. 
+The method consists in building a matrix with one sequence across the top size 
+and the other one down the left size. A path in this matrix can represent an 
+alignment between the sequences: a path is a broken line joining the top row or 
+the left column to the bottom row or the right column. The segments of this 
+broken line are either parallel to the diagonal or parallel to one edge (for a 
+gap). An optimal path corresponds to an optimal alignment. The idea of the 
+method is to recursively find optimal paths beginning at each cell of the matrix 
+and to record their scores in the matrix at the beginning position of the path. 
+Once the matrix has been calculated, a traceback procedure is performed to find 
+the successive cells of the best path. It first cell is the one with the maximum 
+value in the top row or the left column. This value is the score of the 
+alignment.
+	To align two clusters (or a cluster and a sequence), MultAlin uses an 
+extension of this method. For an alignment of two individual sequences, the 
+comparison score between any two-sequence symbols is found in a symbol 
+comparison table. For an alignment of clusters of aligned sequences, the 
+comparison score between any two positions in these clusters is the arithmetic 
+average of the scores of all possible symbol comparisons at these positions. In 
+this average, the sequence weights are used as multiplication factors.
+
+	E. Consensus sequences and scores (step 3)
+	=========================================
+	MultAlin generates a consensus sequence finding at each position a 
+character that is function of the characters in all the sequences at its 
+position. If more than 90% of the characters in the column are the same letter, 
+the consensus character is this letter. If more than 90% of the characters in 
+the column are in the same conservative substitution cluster, the consensus 
+character is this cluster symbol. In both cases, the consensus character and the 
+characters that belong to its symbol cluster are represented with an uppercase 
+letter. If more than 50% of the characters in the column are the same letter, 
+the consensus character is this letter. If more than 50% of the characters in 
+the column are in the same conservative substitution cluster, the consensus 
+character is this cluster symbol. In both cases, the consensus character and the 
+characters that belong to its symbol cluster are represented with a lowercase 
+letter. If none of these conditions is true, the consensus character is a space. 
+The consensus levels (90 and 50) can be modified in the configuration dialog or 
+file (ma.cfg).
+	The multiple alignment produces an alignment for each pair of sequences 
+that are included in it. These pairwise alignments are not necessarily optimal 
+pairwise alignments because they must be compatible between themselves. They are 
+used to compute a new clustering of the sequences (new step 1).
+
+	F. Iteration
+	============
+	The complete process can be represented by the following figure:
+Method step 0 & 1       2           3 & 1            2            3 & 1...
+                Clust       Mult           Clust          Mult          Clust...
+ pass #     0   1           1              2              2    ...
+ where: Clust= Clustering order; Mult= Multiple alignment.
+
+	The iterations stop when two successive clustering orders are identical. 
+If the first clustering order is calculated with the Fast algorithm (step 0), 
+the process usually converges after one or two passes. With an arbitrary first 
+clustering order, more passes can be necessary (4 to 6). In some rare cases, the 
+process can oscillate: if it is between two clustering orders, MultAlin detects 
+it and stop the process; if the cycle is bigger, the user must interrupt the 
+process himself (hitting Ctrl-C). In version 5.1, the maximal number of 
+iterations is set to 10.
+
+	G. Profile alignment
+	====================
+	Since version 5.4, MultAlin can align two profiles or one sequence with a 
+profile. A profile is a set of already aligned sequences. Profiles are read from 
+an alignment file that can be the output file of a previous alignment, in 
+MultAlin format. The value n of the -2 option (-2:n) is the number of the first 
+sequence of the second profile. Each sequence gets the weight it has in the 
+file, normalised so that the mean weight in each profile is 1. Positions that 
+are all '.' or '-' in a profile are deleted from the profile. The two profiles 
+are aligned as the last two clusters of a standard multiple alignment. There is 
+no iteration. A consensus sequence is derived and outputs are created as before. 
+In the special case of an alignment of one sequence with all the others (n =2 or 
+n is the last sequence), the sequence weights are modified to try to give more 
+weights to sequences that are similar to the lonely sequence. This method is 
+inspired by O'Brien (E.A. O'Brien, C. Notredame and D. G, Higgins, 1998, 
+Optimization of ribosomal RNA profile alignments, Bioinformatics, 14, 332-341). 
+The lonely sequence has weight 1. The other sequence weights are normalised so 
+that their mean is 1.A first alignment is done with these weights. The percent 
+difference of all profile sequences with the lonely sequence is estimated with 
+this alignment. The new weights of the profile sequences are the product of 
+their original weight by the reciprocal of the percent difference with the 
+lonely sequence. Weights are then normalised again so that their mean is 1. 
+These new weights are used during the alignment but the original ones are used 
+to derive the consensus sequence. In the output file, the lonely sequence is 
+printed next to its nearest sequence in the profile (use -a option to keep the 
+sequence at its original place).
+
+SECTION -5- File formats
+========================
+	A. Input Sequence File
+	======================
+ MultAlin Format (or Fasta/Pearson format)
+ -----------------------------------------
+	> SeqName the sequence name is the
+	> first word of the first comment line
+	> max: 8 letters
+	> comment lines begin with >
+	AAAACCGTTAAA
+	> SeqNam2 the 2nd sequence beginning
+	> shows the end of the first one
+	AAACCTGGAC
+
+ GenBank Format
+ --------------
+	LOCUS      SeqName
+	any lines
+	ORIGIN     anything
+	1 aggtcccttt tgtgttgttt
+The sequence name is the first word after the LOCUS key word. The sequence 
+begins on the line following the ORIGIN key word. The next sequence information 
+begins with the LOCUS key word.
+
+ EMBL Format (flat file) (or Swiss-Prot format)
+ ------------------------
+	ID   SeqName
+	any lines
+	SQ   anything
+	aauccagug gagaucaaag
+	any sequence lines
+	//
+The sequence name is the first word after the ID key word. The sequence begins 
+on the line following the SQ key word. The next sequence information begins on 
+the line following //
+
+ GCG Format
+ -----------
+	Only one sequence, which name is the file name. The sequence begins on the 
+line that follows '..' Comments between <, > or $ are deleted. 
+
+	B. Output Sequence File
+	=======================
+ mul Format
+ ----------
+	This format is the same as the MultAlin input format. A '-' is inserted in 
+each sequence at a gap position, i.e.:
+>CCPC50       129 Weight: 0.68
+QDGDAAKGEKEFN-KCKACHMIQAPDGTDII-KGGKTGPNLYGVVGRKIA
+SEEGFK-YGEGILEVAEKNPDLTWTEADLIEYVTDPKPWLVKMTDDKGAK
+TKMTFKMGKNQA--DVVAFLAQNSPDAGGDGEAA
+>CCRF2C       116 Weight: 0.68
+--GDAAKGEKEFN-KCKTCHSIIAPDGTEIV-KGAKTGPNLYGVVGRTAG...
+
+ msf Format
+ ----------
+	This is the GCG format for Multiple Sequence File, i.e.:
+Symbol comparison table: blosum62
+Gap weight: 12
+Gap length weight: 2
+Consensus symbols:
+ ! is anyone of IV
+ $ is anyone of LM
+ % is anyone of FY
+ # is anyone of NDQEBZ
+ MSF:    134    Check:   0         ..
+ Name: CCPC50         Len:   134  Check: 7173  Weight:  0.68
+ Name: CCRF2C         Len:   134  Check: 1222  Weight:  0.68
+ Name: CCRF2S         Len:   134  Check: 8544  Weight:  1.39
+ Name: CCQF2R         Len:   134  Check: 9048  Weight:  1.12
+ Name: CCQF2P         Len:   134  Check: 1873  Weight:  1.12
+ Name: Consensus      Len:   134  Check: 5858  Weight:  0.00
+//
+                      1                                                   50
+              CCPC50  QDGDAAKGEK EFN.KCKACH MIQAPDGTDI I.KGGKTGPN LYGVVGRKIA
+              CCRF2C  ..GDAAKGEK EFN.KCKTCH SIIAPDGTEI V.KGAKTGPN LYGVVGRTAG
+              CCRF2S  QEGDPEAGAK AFN.QCQTCH VIVDDSGTTI AGRNAKTGPN LYGVVGRTAG
+              CCQF2R  .EGDAAAGEK VSK.KCLACH TFDQ...... .GGANKVGPN LFGVFENTAA
+              CCQF2P  .AGDAAVGEK IAKAKCTACH DLNK...... .GGPIKVGPP LFGVFGRTTG
+           Consensus  .eGDaaaGeK .fn.kC.aCH .i....gt.i .g...KtGPn LyGVvgrtag
+
+                      51                                                 100
+              CCPC50  SEEGFK.YGE GILEVAEKNP DLTWTEADLI EYVTDPKPWL VKMTDDKGAK...
+
+ doc Format
+ ----------
+Symbol comparison table: blosum62
+Gap weight: 12
+Gap length weight: 2
+Consensus symbols:
+ ! is anyone of IV
+ $ is anyone of LM
+ % is anyone of FY
+# is anyone of NDQEBZ
+ MSF:    134    Check:   0         ..
+ Name: CCPC50         Len:   134  Check: 7173  Weight:  0.68
+ Name: CCRF2C         Len:   134  Check: 1222  Weight:  0.68
+ Name: CCRF2S         Len:   134  Check: 8544  Weight:  1.39
+ Name: CCQF2R         Len:   134  Check: 9048  Weight:  1.12
+ Name: CCQF2P         Len:   134  Check: 1873  Weight:  1.12
+ Name: Consensus      Len:   134  Check: 7880  Weight:  0.00
+//
+            1                                                   50
+    CCPC50  Q(D)[GD](AA)K[G](E)[K] E(FN)-(K)[C]K(A)[CH] M(I)QAPD(GT)D(I) I-KG...
+    CCRF2C    [GD](AA)K[G](E)[K] E(FN)-(K)[C]KT[CH] S(I)IAPD(GT)E(I) V-KGA[K]...
+    CCRF2S  Q(E)[GD]PE(A)[G]A[K] A(FN)-Q[C]QT[CH] V(I)VDDS(GT)T(I) A(G)RNA[K]...
+    CCQF2R   (E)[GD](AAA)[G](E)[K] VSK-(K)[C]L(A)[CH] TFDQ------ -(G)GAN[K]V[...
+    CCQF2P   A[GD](AA)V[G](E)[K] IAKA(K)[C]T(A)[CH] DLNK------ -(G)GPI[K]V[GP...
+ Consensus   (e)[GD](aaa)[G](e)[K]  (fn) (k)[C] (a)[CH]  (i)    (gt) (i)  (g)...
+
+            51                                                 100
+    CCPC50  SEEG[F](K)-[Y]G(E) (G)IL(E)VAE(K)NP D(LT)[W]T[E]AD(L)I E[Y](V)T[D...
+
+	Once the colour indications, () and [], are translated to true colours, 
+this page is similar to a msf page. Lines include 50 residues by blocks of 10 residues.
+Highly conserved positions (marked by []) are red and weakly conserved ones (marked by
+()) are blue.
+	It is possible to parametrise the doc output with 3 parameters in the
+configuration file (edit ma.cfg and use -r option).
+LineSize : is the number of residues by line (default 50)
+GraduationStep : is the number of residues by block in a line (default 10)
+OutputStyle = [Normal | Case | Difference ]
+	Normal (default)
+		In all sequences, all positions are in upper-case. 
+	Case
+		All the positions in each sequence that are identical with the 
+consensus are in upper-case, the other positions are in lower-case. 
+
+   CCQF2P   aGDAAvGEK iakaKCtACH dlnkggpi-- -----KvGPp LFGVfGRTtG TfagYs-Ysp Gyt
+Consensus  ..GDaa.GeK .fn.kC.aCH .i....gt.i .....KtGPn L%GVvgrtag t...%k.Y.e g..
+
+	Difference
+		The first sequence is normal; in the other sequences, the residue 
+identical to the first sequence residue at the same position is represented by a
+point(.), the others are in upper-case. 
+
+   CCPC50  QDGDAAKGEK EFN-KCKACH MIQAPDGTDI I-KGGKTGPN LYGVVGRKIA SEEGFK-YGE GIL
+   CCRF2C    ........ ...-...T.. S.I.....E. V-..A..... .......TAG TYPE..-.KD S.V	Normal : 
+
+
+
+	To translate the colour indications, () and [], to true colours, you can 
+use Microsoft Word and the MultAlin macro, included in MultAlin.dot, as follow:
+Open your .doc file with Microsoft Word (File/Open)
+Change the templates (File/Models... or Tools/Models, Link..., search the disk to 
+select MultAlin.dot, Open)
+Run MultAlin Macro (Tools/Macro..., select MultAlin, Run)
+
+	You can also add MultAlin macro to your current model (Normal.dot):
+Tools/Macro..., Organizer, Close File then Open File (on the same button), 
+search the disk to select MultAlin.dot, Open, select MultAlin, Copy >> into 
+Normal.dot, Close
+
+
+	You can translate the doc format file to an html file as follow (this
+information is also available in doc2html.txt):
+- edit the doc file: for each line after '//'
+	find the line that begins with //
+	add the following line
+</pre><pre class=seq><A NAME='Alignment'></A>
+ 	for each line between current line and end of file
+	 replace all '][' by nothing
+	 replace all ')(' by nothing
+	 replace all '[' by '<em class=high>'
+	 replace all '(' by '<em class=low>'
+	 replace all ']' by '</em>'
+	 replace all ')' by '</em>'
+
+- edit head.html if you want other colours than the default ones
+
+- concatenate the three files
+Unix:	cat head.html myfile.doc tail.html >myfile.html
+Dos:	copy head.html + myfile.doc + tail.html myfile.html
+
+	To make this translation, you can use one of the following scripts:
+- doct2html.csh, that is a C-shell script
+- doc2html.pl, that is a Perl script.
+
+C. Clustering Sequence File
+===========================
+clu file as a list
+------------------
+	This is a standard tree format, i.e.:
+(((CCPC50,CCRF2C),CCRF2S),(CCQF2R,CCQF2P));
+
+	It can be used as a clustering input file.
+
+clu file as a drawing
+---------------------
+	This is a schematic drawing of the clustering tree, i.e.:
+CCPC50   +-------------------+-------------------------------------------------+
+CCRF2C   +                   |                                                 |
+CCRF2S   --------------------+                                                 |
+CCQF2R   ----------+-----------------------------------------------------------+
+CCQF2P   ----------+
+
+	D. Score File
+	=============
+	You can built your own score file; MultAlin will use it to compute its 
+first clustering. Here is an example that shows the format:
+  CCPC50
+  CCRF2S 1257
+  CCRF2C 1273 1245
+  CCQF2R 1136 1173 1134
+  CCQF2P 1098 1143 1122 1255
+
+
+SECTION -6- List of the package files
+=====================================
+
+	MultAlin files:
+	---------------
+ma or ma.exe : MultAlin itself
+multalin.txt : MultAlin documentation (this file)
+ma_c.txt : installation documentation
+*.tab : symbol comparison table files
+source/* : source file if you need to re-make ma
+example/cytc : an example of input file
+example/multalin : an example of command to run ma correctly
+
+	Doc conversion files
+	--------------------	
+doc2html.txt : documentation to translate a MultAlin doc file to an Html file
+doc2html.pl  : perl script that does this job
+doc2html.csh : C-shell script that does this job
+*.html : Html constant parts of a MultAlin result page 
+
+doc2word.txt : documentation to translate a MultAlin doc file to a Microsoft 
+ Word document.
+multalin.dot : Microsoft Word model, including 2 macros to do this job.

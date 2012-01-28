@@ -1,0 +1,35 @@
+> Alternate DNA symbol comparison table
+> This table scores:
+> 8 for a match
+> 6 for a match with a two base ambiguous symbol
+> 4 for a match with a three base ambiguous symbol
+> 3 for a match with a four base ambiguous symbol
+> ambiguous symbols:
+> A or C = M; A or G = R; A or T = W; C or G = S; C or T = Y; G or T = K;
+> A or C or G = V; A or C or T = H; A or G or T = D; C or G or T = B;
+> A or C or G or T = X or N
+> these codes are compatible with the codes used by the EMBL, GenBank and PIR
+> data libraries and by the GCG package
+>
+ A  C  G  T  U     M  R  W  S  Y  K     V  H  D  B     N  X
+ 8  0  0  0  0     6  6  6  0  0  0     4  4  4  0     3  3
+    8  0  0  0     6  0  0  6  6  0     4  4  0  4     3  3
+       8  0  0     0  6  0  6  0  0     4  0  4  4     3  3
+          8  8     0  0  6  0  6  6     0  4  4  4     3  3
+             8     0  0  6  0  6  6     0  4  4  4     3  3
+
+                   6  6  6  6  6  0     4  4  4  4     3  3
+                      6  6  6  0  6     4  4  4  4     3  3
+                         6  0  6  6     4  4  4  4     3  3
+                            6  6  6     4  4  4  4     3  3
+                               6  6     4  4  4  4     3  3
+                                  6     4  4  4  4     3  3
+
+                                        4  4  4  4     3  3
+                                           4  4  4     3  3
+                                              4  4     3  3
+                                                 4     3  3
+
+                                                       3  3
+                                                          3
+30  = Default gap value

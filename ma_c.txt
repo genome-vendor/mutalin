@@ -1,0 +1,85 @@
+                             MultAlin documentation : Installation
+                             -------------------------------------
+
+ Portability
+ -----------           
+        The file "portab.h" contains preprocessor commands which allow to
+compile and run program on different computers and operating systems.
+
+
+
+ Compilation
+ ----------- 
+        Source files:
+        afichseq.c            aligne.c              basproc1.c            cluster.c
+		  coefdisk.c            commande.c            copright.c            disk.c
+        drivers.c             fast.c                gcgdisk.c             lstfseq.c
+        ma.c                  maglob.c              mbgbdisk.c            msfdisk.c
+        msgerr.c              muldisk.c             parametr.c            portab.c
+		  swapd.c               util.c
+ To create 'ma' program in UNIX environment:
+
+        1/ Compile these files to obtain object files:
+					 cc -<ansi_option> -c <filename.c>
+
+        2/ Build the executable file 'ma' by linking all objects files:
+cc -<ansi_option> afichseq.o aligne.o basproc1.o cluster.o coefdisk.c
+commande.o copright.o disk.o drivers.o fast.o gcgdisk.o lstfseq.o ma.o
+maglob.o mbgbdisk.o msfdisk.o msgerr.o muldisk.o parametr.o portab.o swapd.o
+util.o -o ma
+
+where <ansi_option> is the option which allows compilation according to the
+ANSI C directives (1988).
+
+ Installation
+ ------------
+Copy the *.tab files into a directory and set the
+environment variable MULTALIN to its name, e.g.:
+DOS: set MULTALIN=C:\MULTALIN.DIR\
+Unix csh: setenv MULTALIN /usr/Multalin/
+
+Copy 'ma' into a directory that is included in the PATH.
+
+
+ File list
+ ---------
+Symbol comparison tables: *.tab
+Not used since version 5.4.1 (Message files : ma.MSG)
+
+
+Source files:
+
+afichseq.c .h          : to display sequence names while a long computation is
+                       performed
+aligne.c               : alignment
+basproc1.c .h          : basic procedures, used in alignment and elsewhere
+cluster.c              : to handle clustering data
+coefdisk.c             : to read and write comparison table file
+commande.c .h          : to read the command line
+const.h                : constant definition
+copright.c             : copyright information
+deftypes.h             : data types definition
+disk.c                 : general IO procedures
+disk.h                 : header for coefdisk, disk, gcgdisk, lstfseq, mbgbdisk,
+							  msfdisk, muldisk
+drivers.c              : procedures that can be machine dependent
+fast.c                 : Fasta algorithm
+gcgdisk.c              : IO procedures with GCG format
+lstfseq.c              : to handle file of file names
+ma.c                   : main
+ma.h                   : header for aligne, cluster, copright, drivers, fast, maglob
+maglob.c               : global allocation and free of data
+mbgbdisk.c             : IO procedures with EMBL and GenBank format
+msfdisk.c              : to write file in multiple sequence format
+msgerr.c .h            : to display error or help messages
+muldisk.c              : IO procedures with Multalin format
+parametr.c .h          : to handle comparison table
+portab.c               : special procedures when the ANSI one is not present
+portab.h               : machine dependent information -- ALWAYS EDIT THIS FILE --
+swapd.c .h             : to handle the data swapping from memory to disk, and
+                       backward, when it is not performed by the system (i.e. DOS)
+util.c .h              : basic procedures to handle strings, file names ...
+
+tabedit.c              : main program to edit symbol comparison tables
+                         link with coefdisk.c, parametr.c, portab.c, util.c
+

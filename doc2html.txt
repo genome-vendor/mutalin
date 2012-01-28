@@ -1,0 +1,23 @@
+to translate a multalin doc file to an html file:
+- edit the doc file:
+	find the line that begins with //
+	add the following line
+</pre><pre class=seq><A NAME='Alignment'></A>
+ 	for each line between current line and end of file
+	 replace all '][' by nothing
+	 replace all ')(' by nothing
+	 replace all '[' by '<em class=high>'
+	 replace all '(' by '<em class=low>'
+	 replace all ']' by '</em>'
+	 replace all ')' by '</em>'
+
+- edit head.html if you want other colours than the default ones
+
+- concatenate the three files
+Unix:	cat head.html myfile.doc tail.html >myfile.html
+Dos:	copy head.html + myfile.doc + tail.html myfile.html
+
+To make this translation, you can use one of the following scripts:
+doct2html.csh, that is a csh script
+doc2html.pl, that is a Perl script.
+

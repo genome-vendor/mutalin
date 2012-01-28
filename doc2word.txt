@@ -1,0 +1,16 @@
+	To translate the colour indications, () and [], of a MultAlin doc file 
+to true colours, you can  use Microsoft Word and the MultAlin macro, included
+in MultAlin.dot, as follow:
+
+	For a one-time use :
+Open your .doc file with Microsoft Word (File/Open)
+Change the templates (File/Models... or Tools/Models, Link..., search the disk
+ to select MultAlin.dot, Open)
+Run MultAlin Macro (Tools/Macro..., select MultAlin, Run)
+
+	For a repeated use, add MultAlin macro to your current model (Normal.dot):
+Tools/Macro..., Organizer, Close File then Open File (on the same button), 
+search the disk to select MultAlin.dot, Open, select MultAlin, Copy >> into 
+Normal.dot, Close.
+MultAlin Macros are then available (Tools/Macro..., select MultAlin, Run) in any
+Word document that use Normal.dot (default model).

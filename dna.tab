@@ -1,0 +1,30 @@
+> DNA symbol comparison table
+> This table scores a match for any overlep between any IUB nucleic acid
+> ambiguity symbols EXCEPT X/N
+> A or C = M; A or G = R; A or T = W; C or G = S; C or T = Y; G or T = K;
+> A or C or G = V; A or C or T = H; A or G or T = D; C or G or T = B;
+> A or C or G or T = X or N
+> these codes are compatible with the codes used by the EMBL, GenBank and PIR
+> data libraries and by the GCG package
+ A  B  C  D  G   H  K  M  N  R   S  T  U  V  W   X  Y
+ 1  0  0  1  0   1  0  1  1  1   0  0  0  1  1   1  0
+    1  1  1  1   1  1  1  1  1   1  1  1  1  1   1  1
+       1  0  0   1  0  1  1  0   1  0  0  1  0   1  1
+          1  1   1  1  1  1  1   1  1  1  1  1   1  1
+             1   0  1  0  1  1   1  0  0  1  0   1  0
+
+                 1  1  1  1  1   1  1  1  1  1   1  1
+                    1  0  1  1   1  1  1  1  1   1  1
+                       1  1  1   1  0  0  1  1   1  1
+                          1  1   1  1  1  1  1   0  1
+                             1   1  0  0  1  1   1  0
+
+                                 1  0  0  1  0   1  1
+                                    1  1  0  1   1  1
+                                       1  0  1   1  1
+                                          1  1   1  1
+                                             1   1  1
+
+                                                 1  1
+                                                    1
+5 = Default gap value
